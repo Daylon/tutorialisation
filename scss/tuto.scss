@@ -1,0 +1,21 @@
+$gutter: 1.5rem;
+
+:root {
+    font-size: 14px;
+}
+
+body {
+    background-color: #242B35;
+}
+
+.phone {
+    position: absolute;
+    left: 30%;
+    top: calc(50% - 400px);
+    width: 360px;
+    height: 800px;
+    border-radius: $gutter;
+    border: solid 4px #fff;
+    overflow: hidden;
+    overflow-y: auto;
+}

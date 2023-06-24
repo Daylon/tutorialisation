@@ -1,4 +1,5 @@
 :root {
+  font-family: Avenir, Inter, sans-serif;
   font-size: 14px;
 }
 
@@ -7,16 +8,29 @@ body {
 }
 
 .phone {
-  background-color: #0c131f;
   border: 4px solid #fff;
-  border-radius: 1.5rem;
-  width: 360px;
-  height: 800px;
   position: absolute;
   top: calc(50% - 400px);
   left: 30%;
+  overflow: hidden;
+}
+
+.phone, .phone-root {
+  background-color: #0c131f;
+  border-radius: 1.5rem;
+  width: 360px;
+  height: 800px;
+}
+
+.phone-root {
   overflow-x: hidden;
   overflow-y: auto;
+}
+
+.navigation-container {
+  border-radius: 0 0 1rem 1rem;
+  position: absolute;
+  bottom: 0;
 }
 
 .container {
@@ -34,6 +48,17 @@ body {
 
 .container-element:last-child {
   margin-bottom: 4rem;
+}
+
+.is-tip {
+  color: #fff;
+  background-color: #1468cb;
+  border-radius: 1rem;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 296px;
+  padding: 16px;
+  display: flex;
 }
 
 /*# sourceMappingURL=index.87aa33de.css.map */

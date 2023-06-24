@@ -1,8 +1,21 @@
 $gutter: 1rem;
 $large-gutter: $gutter * 4;
 
+$deviceWidth: 360px;
+$deviceHeight: 800px;
+$deviceNavbarHeight: 72px;
+
+$tipColor: #1468CB;
+$tipColorSecondaryHue: #1253A0;
+$tipColorAccent: #fff;
+
+$gridGap: 8px;
+$containerInnerPadding: $gridGap * 4;
+$gridPadding: $gridGap * 2;
+
 :root {
     font-size: 14px;
+    font-family: Avenir, Inter, sans-serif;
 }
 
 body {
@@ -13,13 +26,27 @@ body {
     position: absolute;
     left: 30%;
     top: calc(50% - 400px);
-    width: 360px;
-    height: 800px;
-    background-color: #0C131F;
-    border-radius: $gutter * 1.5;
     border: solid 4px #fff;
     overflow: hidden;
-    overflow-y: auto;
+
+    &, &-root {
+        width: $deviceWidth;
+        height: $deviceHeight;
+        border-radius: $gutter * 1.5;
+        background-color: #0C131F;
+    }
+
+    &-root {
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+}
+
+.navigation-container {
+    position: absolute;
+    bottom: 0;
+    //top: unquote("calc(50% + #{$deviceHeight - $deviceNavbarHeight})");
+    border-radius: 0 0 $gutter $gutter;
 }
 
 .container {
@@ -42,3 +69,15 @@ body {
         }
     }
 }
+
+.is-tip {
+    display: flex;
+    width: unquote("calc( #{$deviceWidth} - #{2 * $containerInnerPadding})");
+    flex-direction: column;
+    align-items: flex-start;
+    padding: $gridPadding;
+    color: $tipColorAccent;
+    background-color: $tipColor;
+    border-radius: $gutter;
+}
+

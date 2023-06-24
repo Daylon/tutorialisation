@@ -61,4 +61,32 @@ body {
   display: flex;
 }
 
+.navbar-backdrop {
+  fill: #0c131f;
+}
+
+.navbar-entry {
+  fill: #fff;
+}
+
+.navbar-entry.is-idling {
+  fill-opacity: .5;
+}
+
+.navbar-entry.is-active {
+  fill: #8de8fe;
+}
+
+.navbar-entry.is-clickable {
+  cursor: pointer;
+}
+
+.navbar-entry-zone, .navbar-underline {
+  opacity: 0;
+}
+
+.is-active .navbar-underline {
+  opacity: 1;
+}
+
 /*# sourceMappingURL=index.87aa33de.css.map */

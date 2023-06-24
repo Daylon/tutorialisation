@@ -9,6 +9,12 @@ $tipColor: #1468CB;
 $tipColorSecondaryHue: #1253A0;
 $tipColorAccent: #fff;
 
+$ctaPrimary: #8DE8FE;
+$ctaIdling: #fff;
+
+$backgroundColor: #0C131F;
+$surfaceColor: #242B35;
+
 $gridGap: 8px;
 $containerInnerPadding: $gridGap * 4;
 $gridPadding: $gridGap * 2;
@@ -19,7 +25,7 @@ $gridPadding: $gridGap * 2;
 }
 
 body {
-    background-color: #242B35;
+    background-color: $surfaceColor;
 }
 
 .phone {
@@ -81,3 +87,36 @@ body {
     border-radius: $gutter;
 }
 
+.navbar {
+    &-backdrop {
+        fill: $backgroundColor;
+    }
+
+    &-entry {
+        fill: $ctaIdling;
+    
+        &.is-idling {
+            fill-opacity: 0.5;
+        }
+
+        &.is-active {
+            fill: $ctaPrimary;
+        }
+
+        &.is-clickable {
+            cursor: pointer;
+        }
+
+        &-zone {
+            opacity: 0;
+        }
+    }
+
+    &-underline {
+        opacity: 0;
+    }
+
+    .is-active &-underline {
+        opacity: 1;
+    }
+}

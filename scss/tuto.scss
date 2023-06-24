@@ -1,4 +1,5 @@
-$gutter: 1.5rem;
+$gutter: 1rem;
+$large-gutter: $gutter * 4;
 
 :root {
     font-size: 14px;
@@ -14,8 +15,30 @@ body {
     top: calc(50% - 400px);
     width: 360px;
     height: 800px;
-    border-radius: $gutter;
+    background-color: #0C131F;
+    border-radius: $gutter * 1.5;
     border: solid 4px #fff;
     overflow: hidden;
     overflow-y: auto;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 16px $gutter;
+    width: 360px;
+
+    &-element {
+        //margin-bottom: $gutter;
+
+        &:first-child {
+            margin-top: $large-gutter;
+        }
+
+        &:last-child {
+            margin-bottom: $large-gutter;
+        }
+    }
 }

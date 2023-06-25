@@ -55,6 +55,11 @@ body {
     border-radius: 0 0 $gutter $gutter;
 }
 
+.pages {
+    display: flex;
+    flex-direction: row;
+}
+
 .container {
     display: flex;
     flex-direction: column;
@@ -94,18 +99,21 @@ body {
 
     &-entry {
         fill: $ctaIdling;
+        cursor: pointer;
     
         &.is-idling {
             fill-opacity: 0.5;
+            cursor: default;
         }
 
         &.is-active {
             fill: $ctaPrimary;
+            cursor: default;
         }
 
-        &.is-clickable {
+        /*&.is-clickable {
             cursor: pointer;
-        }
+        }*/
 
         &-zone {
             opacity: 0;

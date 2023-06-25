@@ -33,6 +33,11 @@ body {
   bottom: 0;
 }
 
+.pages {
+  flex-direction: row;
+  display: flex;
+}
+
 .container {
   flex-direction: column;
   justify-content: center;
@@ -67,18 +72,17 @@ body {
 
 .navbar-entry {
   fill: #fff;
+  cursor: pointer;
 }
 
 .navbar-entry.is-idling {
   fill-opacity: .5;
+  cursor: default;
 }
 
 .navbar-entry.is-active {
   fill: #8de8fe;
-}
-
-.navbar-entry.is-clickable {
-  cursor: pointer;
+  cursor: default;
 }
 
 .navbar-entry-zone, .navbar-underline {

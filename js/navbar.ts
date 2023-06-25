@@ -17,16 +17,18 @@ class Navbar {
         this.navEntries = new Array()
         candidates.forEach((entryTarget:string)=>{
             this.navEntries.push(new NavEntry(entryTarget))
-            console.log(this.entryCount, this.navEntries.length )
-            this.navEntries[this.entryCount].addEventListener(`change-to-${entryTarget}`, this.changePage)
+            this.navEntries[this.entryCount].addEventListener(this.navEntries[this.entryCount].getSlug(), (event:Event):void => {
+                let { type } = event,
+                inactiveEntries = this.navEntries.filter(entry => entry.getSlug() !== type) 
+                inactiveEntries.forEach(this.enableEntry)
+                    })
             this.entryCount++;
         })
     }
 
-    changePage(event:Event):void {
-        console.log(event)
+    enableEntry(entry:NavEntry):void {
+        entry.toggleState(true)
     }
-
 }
 
 class NavEntry extends EventTarget{
@@ -41,23 +43,22 @@ class NavEntry extends EventTarget{
         this.id = whichTarget
         this.isActive = true;
         this.isClickable = true;
-        console.log( this.isClickable)
         this.domElement = document.querySelector(`${whichTarget}`)
-        this.domElement?.addEventListener("pointerup", this.click)
+        this.domElement?.addEventListener("pointerup", (event:Event)=>{
+            if( this.isClickable === true ){
+                this.dispatchEvent(new Event( this.getSlug()))
+                this.toggleState(false)
+            }
+        })
     }
 
-    click(event:Event):void {
-        console.log(this.id, this.isClickable)
-        if( this.isClickable === true ){
-            this.dispatchEvent(new Event(`change-to-${this.id}`))
-            this.toggleState(false)
-        }
+    getSlug():string {
+        return `change-to${this.id.replace(/\./g, '-')}`
     }
 
     toggleState(forceTo?:Boolean):Boolean {
         this.isClickable = forceTo?  forceTo : !this.isClickable;
-        this.domElement?.classList[this.isClickable === true ? `add`:`remove`](`is-clickable`)
-        this.domElement?.classList[this.isClickable === false ? `add`:`remove`](`is-active`)
+        this.domElement?.classList[this.isClickable === true ? `remove` : `add`](`is-active`)
         return this.isClickable
     }
 }

@@ -1,17 +1,12 @@
-// An interactive describes a touchable HCI
-interface Interactive {
-    id: number;
-    name: string;
-    dom: DocumentFragment;
-    prop: Object;
-    triggerRef: string;
-}
+import { animate, easeInOut } from "popmotion"
 
 // One tip bubble
 class Step {
     label: string;
     id?:number;
     amount?:number;
+    isDisplayed:boolean; // useful
+    isSnoozed:boolean; // don't know yet if useful (e.g. "I touched elsewshere, I changed the page")
 
     constructor(stepLabel:string){
         this.label = stepLabel
@@ -26,9 +21,12 @@ class Step {
 
 // A tip contains the general tutorial description
 class Tip {
-    target: string;
-    domElement: Element | null;
+    root: Element | null;
     page: Element | null;
+    target: string;
+    pageAnchor: Element | null;
+    tipBody: Element | null;
+    miniplayer: Element;
     tipElements: {
         dismiss: string,
         tag: string,
@@ -38,17 +36,30 @@ class Tip {
     pitch: string;
     active: boolean;
     isPlaying: boolean;
+    asMiniplayer: boolean;
     currentStep: number;
     steps: Step[];
+    scrollLastSample:number;
+    scrollSampling:number;
+    animationDuration:number;
+    animationLock:boolean;
+    animationScrollTolerance:number;
 
-    constructor(targetPage:string, tipTarget:string, tipPitch:string, shouldBeActive:boolean, shouldPlay:boolean) {
+    constructor(rootPrototype:string, targetPage:string, tipTarget:string, tipPitch:string, shouldBeActive:boolean, shouldPlay:boolean) {
         this.target = tipTarget
         this.pitch = tipPitch
         this.active = shouldBeActive
         this.isPlaying = shouldPlay
+        this.asMiniplayer = false
         this.steps = []
-        this.domElement = document.querySelector(`#${this.target}`)
+        this.root = document.querySelector(`#${rootPrototype}`)
         this.page = document.querySelector(`#${targetPage}`)
+        this.pageAnchor = document.querySelector(`#${this.target}`)
+        this.scrollSampling = 5
+        this.scrollLastSample = -1
+        this.animationDuration = 320
+        this.animationLock = false
+        this.animationScrollTolerance = 50
 
         this.tipElements = {
             dismiss: `<svg class="dismiss" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -90,18 +101,21 @@ class Tip {
     // displays
 
     render():void {
-        const build = document.createElement(`div`),
-        miniplayer = document.createElement(`div`)
+        const build = document.createElement(`div`)
+        this.miniplayer = document.createElement(`div`)
         // tutorial invite
         build.classList.add('container-element', 'is-tip')
         build.innerHTML = this.getTipMarkup()
-        this.domElement?.parentNode?.insertBefore(build, this.domElement)
+        this.tipBody = build
+        this.pageAnchor?.parentNode?.insertBefore(build, this.pageAnchor)
         // TODO: listener - check tip visibility in viewport
         // TODO: function - check tip "is playing" status and, then, show or hide miniplayer
         // tutorial miniplayer (shown when tutorial is launched)
-        miniplayer.classList.add('miniplayer', 'miniplayer-active')
-        miniplayer.innerHTML = this.tipElements.miniplayer
-        this.page?.prepend(miniplayer)
+        this.miniplayer.classList.add('miniplayer', 'miniplayer-active')
+        this.miniplayer.innerHTML = this.tipElements.miniplayer
+        this.page?.prepend(this.miniplayer)
+
+        this.listenScrollEvent(this.miniplayer)
     }
 
     getTipMarkup():string {
@@ -114,6 +128,55 @@ class Tip {
         this.steps[forceStep || this.currentStep].getStepMarkup()
     }
 
+    getAnimationDirection(tipOverMiniplayer:boolean):any {
+        let from:number = tipOverMiniplayer === true ? 1 : 0,
+        to:number = tipOverMiniplayer === true ? 0 : 1
+
+        return { from, to, duration: this.animationDuration, ease: easeInOut, onUpdate: latest => {
+           (this.miniplayer  as HTMLElement ).style.opacity = `${latest}`;
+           (this.miniplayer  as HTMLElement ).style.top = `${latest * 64 - 64}px`;
+        }, onComplete: () => {
+            this.animationLock = false
+        } }
+    }
+
+    // passive events
+
+    listenScrollEvent(miniplayer:Element):void {
+        this.root?.addEventListener('scroll',(scroll:Event):void => {
+            let tipBox:{
+                y:number,
+                height:number
+            } = this.tipBody?.getBoundingClientRect() ?? { y:-1, height: -1},
+            rootBox:{
+                y:number,
+                height:number
+            } = this.root?.getBoundingClientRect() ?? { y:-1, height: -1},
+            tipOverMiniplayer:boolean = false, // by default, miniplayer wins over header
+            tipMaxY:number = tipBox.y + tipBox.height
+            if( Math.abs(this.scrollLastSample - tipBox.y)>this.scrollSampling){ // avoids too much computation on a recurring event
+                // is tip's invite visible from the viewport?
+                if( 
+                    // Y de tip > Y de page/proto
+                    // Y + height < Y de page + height de proto
+                    tipMaxY > rootBox.y + this.animationScrollTolerance
+                    && tipBox.y < rootBox.y + rootBox.height - this.animationScrollTolerance
+                ){
+                    // tip is visible, miniplayer should be hidden
+                    tipOverMiniplayer = true
+                }
+                if( this.animationLock === false
+                    && tipOverMiniplayer === this.asMiniplayer ){
+                    // Animate the transition
+                    animate(this.getAnimationDirection(tipOverMiniplayer))
+                    this.scrollLastSample = tipBox.y // keep a record of this sampled value
+                    this.asMiniplayer = !tipOverMiniplayer // even if it's a future state
+                    console.log('miniplayer will be ',  this.asMiniplayer)
+                    this.animationLock = true
+                }
+            }
+        })
+    }
 
     // control
 
@@ -148,7 +211,7 @@ class Tip {
 
 // START
 
-const tuto:Tip = new Tip("page-homepage", "hp-gares","Consultez facilement les horaires en gare!", true, false)
+const tuto:Tip = new Tip("prototype", "page-homepage", "hp-infotrafic","Comment suivre sa ligne préférée&nbsp;?", true, false)
 
 const step01:Step = new Step( "appuyez sur un bouton")
 

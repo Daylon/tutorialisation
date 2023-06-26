@@ -64,7 +64,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     gap: 16px $gutter;
     width: 360px;
 

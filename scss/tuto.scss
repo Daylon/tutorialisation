@@ -86,6 +86,7 @@ body {
     width: unquote("calc( #{$deviceWidth} - #{2 * $containerInnerPadding})");
     flex-direction: column;
     align-items: flex-start;
+    column-gap: $gutter;
     padding: $gridPadding;
     color: $tipColorAccent;
     background-color: $tipColor;
@@ -126,5 +127,15 @@ body {
 
     .is-active &-underline {
         opacity: 1;
+    }
+}
+
+.tip {
+
+    &-header {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
     }
 }

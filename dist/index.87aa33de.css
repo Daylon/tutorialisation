@@ -68,11 +68,36 @@ body {
   background-color: #1468cb;
   border-radius: 1rem;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: stretch;
   column-gap: 1rem;
-  width: 296px;
+  width: 328px;
+  display: flex;
+  overflow: hidden;
+}
+
+.tip-header {
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 16px 16px 0;
+  display: flex;
+}
+
+.tip-body {
+  flex-direction: row;
+  column-gap: 8px;
   padding: 16px;
   display: flex;
+}
+
+.tip-body-label {
+  align-self: center;
+  font-size: 1.2rem;
+  font-weight: 400;
+}
+
+.tip-footer {
+  background-color: #1253a0;
+  padding: 8px 16px 8px 72px;
 }
 
 .navbar-backdrop {
@@ -100,13 +125,6 @@ body {
 
 .is-active .navbar-underline {
   opacity: 1;
-}
-
-.tip-header {
-  flex-direction: row;
-  justify-content: space-between;
-  width: 100%;
-  display: flex;
 }
 
 .miniplayer {

@@ -92,14 +92,43 @@ body {
 
 .is-tip {
     display: flex;
-    width: unquote("calc( #{$deviceWidth} - #{2 * $containerInnerPadding})");
+    //width: unquote("calc( #{$deviceWidth} - #{2 * $containerInnerPadding})");
+    width: 328px;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     column-gap: $gutter;
-    padding: $gridPadding;
+    //padding: $gridPadding;
     color: $tipColorAccent;
     background-color: $tipColor;
     border-radius: $gutter;
+    overflow: hidden;
+}
+
+.tip {
+    &-header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        padding: $gridPadding $gridPadding 0 $gridPadding;
+    }
+
+    &-body {
+        display: flex;
+        flex-direction: row;
+        padding: $gridPadding $gridPadding;
+        column-gap: $gridGap;
+
+        &-label {
+            align-self: center;
+            font-size: 1.2rem;
+            font-weight: 400;
+        }
+    }
+
+    &-footer {
+        padding: $gridGap $gridPadding $gridGap 72px;
+        background-color: $tipColorSecondaryHue;
+    }
 }
 
 .navbar {
@@ -136,16 +165,6 @@ body {
 
     .is-active &-underline {
         opacity: 1;
-    }
-}
-
-.tip {
-
-    &-header {
-        width: 100%;
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
     }
 }
 

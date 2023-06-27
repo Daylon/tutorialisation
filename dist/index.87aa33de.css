@@ -47,12 +47,16 @@ body {
   display: flex;
 }
 
-.container-element:first-child {
+.container-element:last-child {
+  margin-bottom: 4rem;
+}
+
+#page-homepage .container-element:first-child {
   margin-top: 4rem;
 }
 
-.container-element:last-child {
-  margin-bottom: 4rem;
+#page-root-stations {
+  align-self: flex-start;
 }
 
 .as-hidden {

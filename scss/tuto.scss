@@ -64,21 +64,26 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
     gap: 16px $gutter;
     width: 360px;
 
     &-element {
         //margin-bottom: $gutter;
 
-        &:first-child {
-            margin-top: $large-gutter;
-        }
 
         &:last-child {
             margin-bottom: $large-gutter;
         }
     }
+}
+
+#page-homepage .container-element:first-child{
+    margin-top: $large-gutter;
+}
+
+#page-root-stations {
+    align-self: flex-start;
 }
 
 .as-hidden {

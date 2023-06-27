@@ -575,17 +575,7 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
 
 },{}],"7NFVV":[function(require,module,exports) {
 var _popmotion = require("popmotion");
-// One tip bubble
-class Step {
-    constructor(stepLabel){
-        this.label = stepLabel;
-    }
-    getStepMarkup(newId, totalStepsAmount) {
-        if (newId) this.id = newId;
-        if (totalStepsAmount) this.amount = totalStepsAmount;
-        return `${this.label}`;
-    }
-}
+var _steps = require("./steps");
 // A tip contains the general tutorial description
 class Tip {
     constructor(rootPrototype, targetPage, tipTarget, tipPitch, shouldBeActive, shouldPlay){
@@ -705,6 +695,8 @@ class Tip {
                 }
             }
         });
+        this.root?.dispatchEvent(new Event("scroll")) // pre-render
+        ;
     }
     // control
     next() {
@@ -733,15 +725,15 @@ class Tip {
 }
 // START
 const tuto = new Tip("prototype", "page-homepage", "hp-infotrafic", "Comment suivre sa ligne pr\xe9f\xe9r\xe9e&nbsp;?", true, false);
-const step01 = new Step("appuyez sur un bouton");
-const step02 = new Step("filtrez vos lignes");
+const step01 = new (0, _steps.Step)("appuyez sur un bouton");
+const step02 = new (0, _steps.Step)("filtrez vos lignes");
 tuto.addSteps([
     step01,
     step02
 ]);
 tuto.render();
 
-},{"popmotion":"iemqi"}],"iemqi":[function(require,module,exports) {
+},{"popmotion":"iemqi","./steps":"3WWxg"}],"iemqi":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "animate", ()=>(0, _indexMjs.animate));
@@ -2386,6 +2378,22 @@ function reverseElapsed(elapsed, duration, delay = 0, isForwardPlayback = true) 
 }
 function hasRepeatDelayElapsed(elapsed, duration, delay, isForwardPlayback) {
     return isForwardPlayback ? elapsed >= duration + delay : elapsed <= -delay;
+}
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"3WWxg":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "Step", ()=>Step);
+// One tip bubble
+class Step {
+    constructor(stepLabel){
+        this.label = stepLabel;
+    }
+    getStepMarkup(newId, totalStepsAmount) {
+        if (newId) this.id = newId;
+        if (totalStepsAmount) this.amount = totalStepsAmount;
+        return `${this.label}`;
+    }
 }
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["8fBAf","7NFVV"], "7NFVV", "parcelRequire94c2")

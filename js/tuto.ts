@@ -28,21 +28,24 @@ class Tip {
     animationLock:boolean;
     animationScrollTolerance:number;
 
-    constructor(rootPrototype:string, targetPage:string, tipTarget:string, tipPitch:string, shouldBeActive:boolean, shouldPlay:boolean) {
+    //constructor(rootPrototype:string, targetPage:string, tipTarget:string, tipPitch:string, shouldBeActive:boolean, shouldPlay:boolean) {
+    constructor(context:{root:string, page:string}, tipTarget:string, tipPitch:string, shouldBeActive:boolean, shouldPlay:boolean) {
         this.target = tipTarget
         this.pitch = tipPitch
         this.active = shouldBeActive
         this.isPlaying = shouldPlay
         this.asMiniplayer = false
         this.steps = []
-        this.root = document.querySelector(`#${rootPrototype}`)
-        this.page = document.querySelector(`#${targetPage}`)
+        this.root = document.querySelector(`#${context.root}`)
+        this.page = document.querySelector(`#${context.page}`)
         this.pageAnchor = document.querySelector(`#${this.target}`)
         this.scrollSampling = 5
         this.scrollLastSample = -1
         this.animationDuration = 320
         this.animationLock = false
         this.animationScrollTolerance = 50
+
+        this.currentStep = -1
 
         this.tipElements = {
             dismiss: `<svg class="dismiss" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -80,12 +83,13 @@ class Tip {
 
     // setup
 
-    addStep(entry:Step) {
+    addStep(entry:Step,index:number,amount:number) {
+        entry.set(index,amount)
         this.steps.push(entry)
     }
 
     addSteps(entries:Step[]) {
-        entries.forEach(entry => this.addStep(entry))
+        entries.forEach((entry:Step, index:number) => this.addStep(entry,index,entries.length))
     }
 
     // displays
@@ -121,10 +125,6 @@ class Tip {
         return this.tipElements?.pause
     }
 
-    displayCurrentStep(forceStep?:number):void {
-        this.steps[forceStep || this.currentStep].getStepMarkup()
-    }
-
     getAnimationDirection(tipOverMiniplayer:boolean):any {
         let from:number = tipOverMiniplayer === true ? 1 : 0,
         to:number = tipOverMiniplayer === true ? 0 : 1
@@ -148,10 +148,10 @@ class Tip {
 
     checkBackEvent(miniplayer:Element):void {
         miniplayer.addEventListener('pointerup',(click:Event):void => {
-            console.log(this.tipBody?.getBoundingClientRect())
-            //this.root?.scrollTo({top: this.tipBody?.getBoundingClientRect().top, behavior: 'smooth' })
             this.tipBody?.scrollIntoView({
-                behavior: 'smooth'
+                block: "start",
+                inline: "nearest",
+                behavior: "smooth"
             })
         })
     }
@@ -196,25 +196,27 @@ class Tip {
         this.root?.dispatchEvent(new Event('scroll')) // pre-render
     }
 
-    sleep():void {
-
-    }
-
-
-    // control
+    // control & steps
 
     next():number {
         this.currentStep++
         this.isPlaying = true // obviously
         if( this.currentStep === this.steps.length){ // maxed out
             // we should summon "we're finished here!"
-
+            this.steps[this.currentStep]?.display()
         } 
         return this.currentStep
     }
 
+    sleep():void {
+        // hide current step
+        // deactivate main tip cue
+    }
+
     playPause():boolean {
         this.isPlaying = !this.isPlaying
+        if(this.isPlaying === true) this.next()
+        else this.sleep()
         return this.isPlaying
     }
 
@@ -226,7 +228,7 @@ class Tip {
     // red buttons
 
     reset():void{
-        this.currentStep = 0
+        this.currentStep = -1 // "next" will increment by default to zero
         this.isPlaying = false
     }
 
@@ -234,11 +236,19 @@ class Tip {
 
 // START
 
-const tuto:Tip = new Tip("prototype", "page-homepage", "hp-infotrafic","Comment suivre sa ligne préférée&nbsp;?", true, false)
+const context: {
+    root:string,
+    page:string
+} = {
+    root: "prototype",
+    page: "page-homepage"
+}
 
-const step01:Step = new Step( "appuyez sur un bouton")
+const tuto:Tip = new Tip(context,"hp-infotrafic","Comment suivre sa ligne préférée&nbsp;?", true, false)
 
-const step02:Step = new Step("filtrez vos lignes")
+const step01:Step = new Step( context, "appuyez sur un bouton")
+
+const step02:Step = new Step(context, "filtrez vos lignes")
 
 tuto.addSteps([step01,step02])
 tuto.render()

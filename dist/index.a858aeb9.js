@@ -578,21 +578,23 @@ var _popmotion = require("popmotion");
 var _steps = require("./steps");
 // A tip contains the general tutorial description
 class Tip {
-    constructor(rootPrototype, targetPage, tipTarget, tipPitch, shouldBeActive, shouldPlay){
+    //constructor(rootPrototype:string, targetPage:string, tipTarget:string, tipPitch:string, shouldBeActive:boolean, shouldPlay:boolean) {
+    constructor(context, tipTarget, tipPitch, shouldBeActive, shouldPlay){
         this.target = tipTarget;
         this.pitch = tipPitch;
         this.active = shouldBeActive;
         this.isPlaying = shouldPlay;
         this.asMiniplayer = false;
         this.steps = [];
-        this.root = document.querySelector(`#${rootPrototype}`);
-        this.page = document.querySelector(`#${targetPage}`);
+        this.root = document.querySelector(`#${context.root}`);
+        this.page = document.querySelector(`#${context.page}`);
         this.pageAnchor = document.querySelector(`#${this.target}`);
         this.scrollSampling = 5;
         this.scrollLastSample = -1;
         this.animationDuration = 320;
         this.animationLock = false;
         this.animationScrollTolerance = 50;
+        this.currentStep = -1;
         this.tipElements = {
             dismiss: `<svg class="dismiss" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M13.4025 12L19 17.5975L17.5975 19L12 13.4025L6.40248 19L5.00001 17.5975L10.5975 12L5 6.40253L6.40248 5L12 10.5975L17.5975 5L18.9999 6.40253L13.4025 12Z" fill="white"/>
@@ -627,11 +629,12 @@ class Tip {
         };
     }
     // setup
-    addStep(entry) {
+    addStep(entry, index, amount) {
+        entry.set(index, amount);
         this.steps.push(entry);
     }
     addSteps(entries) {
-        entries.forEach((entry)=>this.addStep(entry));
+        entries.forEach((entry, index)=>this.addStep(entry, index, entries.length));
     }
     // displays
     render() {
@@ -661,9 +664,6 @@ class Tip {
         if (this.isPlaying === false) return this.tipElements?.play;
         return this.tipElements?.pause;
     }
-    displayCurrentStep(forceStep) {
-        this.steps[forceStep || this.currentStep].getStepMarkup();
-    }
     getAnimationDirection(tipOverMiniplayer) {
         let from = tipOverMiniplayer === true ? 1 : 0, to = tipOverMiniplayer === true ? 0 : 1;
         return {
@@ -689,9 +689,9 @@ class Tip {
     }
     checkBackEvent(miniplayer) {
         miniplayer.addEventListener("pointerup", (click)=>{
-            console.log(this.tipBody?.getBoundingClientRect());
-            //this.root?.scrollTo({top: this.tipBody?.getBoundingClientRect().top, behavior: 'smooth' })
             this.tipBody?.scrollIntoView({
+                block: "start",
+                inline: "nearest",
                 behavior: "smooth"
             });
         });
@@ -729,17 +729,23 @@ class Tip {
         this.root?.dispatchEvent(new Event("scroll")) // pre-render
         ;
     }
-    sleep() {}
-    // control
+    // control & steps
     next() {
         this.currentStep++;
         this.isPlaying = true // obviously
         ;
-        this.currentStep, this.steps.length;
+        if (this.currentStep === this.steps.length) // we should summon "we're finished here!"
+        this.steps[this.currentStep]?.display();
         return this.currentStep;
+    }
+    sleep() {
+    // hide current step
+    // deactivate main tip cue
     }
     playPause() {
         this.isPlaying = !this.isPlaying;
+        if (this.isPlaying === true) this.next();
+        else this.sleep();
         return this.isPlaying;
     }
     // rando getters
@@ -751,14 +757,19 @@ class Tip {
     }
     // red buttons
     reset() {
-        this.currentStep = 0;
+        this.currentStep = -1 // "next" will increment by default to zero
+        ;
         this.isPlaying = false;
     }
 }
 // START
-const tuto = new Tip("prototype", "page-homepage", "hp-infotrafic", "Comment suivre sa ligne pr\xe9f\xe9r\xe9e&nbsp;?", true, false);
-const step01 = new (0, _steps.Step)("appuyez sur un bouton");
-const step02 = new (0, _steps.Step)("filtrez vos lignes");
+const context = {
+    root: "prototype",
+    page: "page-homepage"
+};
+const tuto = new Tip(context, "hp-infotrafic", "Comment suivre sa ligne pr\xe9f\xe9r\xe9e&nbsp;?", true, false);
+const step01 = new (0, _steps.Step)(context, "appuyez sur un bouton");
+const step02 = new (0, _steps.Step)(context, "filtrez vos lignes");
 tuto.addSteps([
     step01,
     step02
@@ -2418,13 +2429,44 @@ parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "Step", ()=>Step);
 // One tip bubble
 class Step {
-    constructor(stepLabel){
+    constructor(context, stepLabel, coords){
+        this.root = document.querySelector(`#${context.root}`);
+        this.page = document.querySelector(`#${context.page}`);
         this.label = stepLabel;
     }
-    getStepMarkup(newId, totalStepsAmount) {
+    getStepMarkup() {
+        return `${this.label}`;
+    }
+    set(newId, totalStepsAmount) {
         if (newId) this.id = newId;
         if (totalStepsAmount) this.amount = totalStepsAmount;
-        return `${this.label}`;
+        if (this.isSet === false) {
+            this.markup = document.createElement(`div`);
+            this.markup.classList.add("step", "as-hidden");
+            this.markup.innerHTML = this.getStepMarkup();
+            this.page?.append(this.markup);
+        }
+        this.isSet = true;
+    }
+    switchClass(forceTo) {
+        this.markup.classList[forceTo === true ? "remove" : "add"]("as-hidden");
+        this.markup.classList[forceTo === true ? "add" : "remove"]("as-displayed");
+        this.isDisplayed = forceTo ?? false;
+    }
+    // public usage
+    add(options) {
+        this.set(options.newId, options.totalStepsAmount);
+        this.switchClass(options.forceTo ?? false);
+    }
+    display() {
+        this.add({
+            forceTo: true
+        });
+    }
+    insert() {
+        this.add({
+            forceTo: false
+        });
     }
 }
 

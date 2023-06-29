@@ -85,6 +85,7 @@ class Tip {
 
     addStep(entry:Step,index:number,amount:number) {
         entry.set(index,amount)
+        entry.addEventListener("next", () => this.next())
         this.steps.push(entry)
     }
 
@@ -102,8 +103,6 @@ class Tip {
         build.innerHTML = this.getTipMarkup()
         this.tipBody = build
         this.pageAnchor?.parentNode?.insertBefore(build, this.pageAnchor)
-        // TODO: listener - check tip visibility in viewport
-        // TODO: function - check tip "is playing" status and, then, show or hide miniplayer
         // tutorial miniplayer (shown when tutorial is launched)
         this.miniplayer.classList.add('miniplayer', 'miniplayer-active')
         this.miniplayer.innerHTML = this.tipElements.miniplayer
@@ -148,11 +147,12 @@ class Tip {
 
     checkBackEvent(miniplayer:Element):void {
         miniplayer.addEventListener('pointerup',(click:Event):void => {
-            this.tipBody?.scrollIntoView({
+            this.steps[this.currentStep].focus()
+            /*this.tipBody?.scrollIntoView({
                 block: "start",
                 inline: "nearest",
                 behavior: "smooth"
-            })
+            })*/
         })
     }
 
@@ -199,18 +199,20 @@ class Tip {
     // control & steps
 
     next():number {
+        if( this.currentStep > -1 ) this.steps[this.currentStep]?.switchClass(false) // we off the old step
         this.currentStep++
-        this.isPlaying = true // obviously
         if( this.currentStep === this.steps.length){ // maxed out
-            // we should summon "we're finished here!"
+            // we should summon "congrats ! we're finished here!"
+            this.reset()
+        } else {
             this.steps[this.currentStep]?.display()
-        } 
+        }
         return this.currentStep
     }
 
     sleep():void {
-        // hide current step
-        // deactivate main tip cue
+        this.steps[this.currentStep]?.switchClass(false) // basically shutdown it off
+        this.currentStep--
     }
 
     playPause():boolean {
@@ -230,6 +232,7 @@ class Tip {
     reset():void{
         this.currentStep = -1 // "next" will increment by default to zero
         this.isPlaying = false
+        if( this.tipBody !== null ) this.tipBody.innerHTML = this.getTipMarkup()
     }
 
 }
@@ -246,9 +249,9 @@ const context: {
 
 const tuto:Tip = new Tip(context,"hp-infotrafic","Comment suivre sa ligne préférée&nbsp;?", true, false)
 
-const step01:Step = new Step( context, "appuyez sur un bouton")
+const step01:Step = new Step(context, "appuyez sur un bouton", "hp-infotrafic")
 
-const step02:Step = new Step(context, "filtrez vos lignes")
+const step02:Step = new Step(context, "filtrez vos lignes", "hp-infotrafic")
 
 tuto.addSteps([step01,step02])
 tuto.render()

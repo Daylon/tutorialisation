@@ -28,6 +28,7 @@ body {
 }
 
 .navigation-container {
+  z-index: 2;
   border-radius: 0 0 1rem 1rem;
   position: absolute;
   bottom: 0;
@@ -35,6 +36,7 @@ body {
 
 .pages {
   flex-direction: row;
+  padding-bottom: 8rem;
   display: flex;
 }
 
@@ -63,16 +65,48 @@ body {
   display: none;
 }
 
-.is-tip {
+.is-tip, .is-step {
   color: #fff;
   background-color: #1468cb;
   border-radius: 1rem;
   flex-direction: column;
   align-items: stretch;
   column-gap: 1rem;
+  overflow: hidden;
+}
+
+.is-tip {
   width: 328px;
   display: flex;
-  overflow: hidden;
+}
+
+.is-step {
+  row-gap: 8px;
+  min-width: 160px;
+  padding: 16px;
+  display: flex;
+  position: absolute;
+  top: 0;
+  box-shadow: 0 10px 36px #00000029, 0 0 0 1px #0000000f;
+}
+
+.is-step.as-hidden {
+  display: none;
+}
+
+.step-header, .step-label, .step-footer {
+  flex-direction: row;
+  display: flex;
+}
+
+.step-header {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.step-footer {
+  justify-content: space-between;
+  margin-top: 8px;
 }
 
 .tip-header {
@@ -98,6 +132,10 @@ body {
 .tip-footer {
   background-color: #1253a0;
   padding: 8px 16px 8px 72px;
+}
+
+.page {
+  position: relative;
 }
 
 .navbar-backdrop {
@@ -129,6 +167,7 @@ body {
 
 .miniplayer {
   opacity: 0;
+  z-index: 2;
   margin-top: -64px;
   position: sticky;
   top: 0;

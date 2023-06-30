@@ -574,8 +574,11 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
 }
 
 },{}],"7NFVV":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 var _popmotion = require("popmotion");
 var _steps = require("./steps");
+var _fastdom = require("fastdom");
+var _fastdomDefault = parcelHelpers.interopDefault(_fastdom);
 // A tip contains the general tutorial description
 class Tip {
     //constructor(rootPrototype:string, targetPage:string, tipTarget:string, tipPitch:string, shouldBeActive:boolean, shouldPlay:boolean) {
@@ -688,45 +691,53 @@ class Tip {
     }
     checkBackEvent(miniplayer) {
         miniplayer.addEventListener("pointerup", (click)=>{
+            console.log(this.steps);
             this.steps[this.currentStep].focus();
-        /*this.tipBody?.scrollIntoView({
-                block: "start",
-                inline: "nearest",
-                behavior: "smooth"
-            })*/ });
+        });
     }
     // passive events
     listenScrollEvent(miniplayer) {
-        this.root?.addEventListener("scroll", (scroll)=>{
-            if (this.isPlaying === false) return false // bail out if not currently playing
-            ;
-            let tipBox = this.tipBody?.getBoundingClientRect() ?? {
+        let rootBox, tipBox;
+        (0, _fastdomDefault.default).measure(()=>{
+            rootBox = this.root?.getBoundingClientRect() ?? {
                 y: -1,
                 height: -1
-            }, rootBox = this.root?.getBoundingClientRect() ?? {
+            };
+            tipBox = this.tipBody?.getBoundingClientRect() ?? {
                 y: -1,
                 height: -1
-            }, tipOverMiniplayer = false, tipMaxY = tipBox.y + tipBox.height;
-            if (Math.abs(this.scrollLastSample - tipBox.y) > this.scrollSampling) {
-                // is tip's invite visible from the viewport?
-                if (// Y de tip > Y de page/proto
-                // Y + height < Y de page + height de proto
-                tipMaxY > rootBox.y + this.animationScrollTolerance && tipBox.y < rootBox.y + rootBox.height - this.animationScrollTolerance) // tip is visible, miniplayer should be hidden
-                tipOverMiniplayer = true;
-                if (this.animationLock === false && tipOverMiniplayer === this.asMiniplayer) {
-                    // Animate the transition
-                    (0, _popmotion.animate)(this.getAnimationDirection(tipOverMiniplayer));
-                    this.scrollLastSample = tipBox.y // keep a record of this sampled value
-                    ;
-                    this.asMiniplayer = !tipOverMiniplayer // even if it's a future state
-                    ;
-                    this.animationLock = true;
+            };
+            this.root?.addEventListener("scroll", (scroll)=>{
+                if (this.isPlaying === false) return false // bail out if not currently playing
+                ;
+                let tipBox = this.tipBody?.getBoundingClientRect() ?? {
+                    y: -1,
+                    height: -1
+                }, rootBox = this.root?.getBoundingClientRect() ?? {
+                    y: -1,
+                    height: -1
+                }, tipOverMiniplayer = false, tipMaxY = tipBox.y + tipBox.height;
+                if (Math.abs(this.scrollLastSample - tipBox.y) > this.scrollSampling) {
+                    // is tip's invite visible from the viewport?
+                    if (// Y de tip > Y de page/proto
+                    // Y + height < Y de page + height de proto
+                    tipMaxY > rootBox.y + this.animationScrollTolerance && tipBox.y < rootBox.y + rootBox.height - this.animationScrollTolerance) // tip is visible, miniplayer should be hidden
+                    tipOverMiniplayer = true;
+                    if (this.animationLock === false && tipOverMiniplayer === this.asMiniplayer) {
+                        // Animate the transition
+                        (0, _popmotion.animate)(this.getAnimationDirection(tipOverMiniplayer));
+                        this.scrollLastSample = tipBox.y // keep a record of this sampled value
+                        ;
+                        this.asMiniplayer = !tipOverMiniplayer // even if it's a future state
+                        ;
+                        this.animationLock = true;
+                    }
                 }
-            }
-            return true;
+                return true;
+            });
+            this.root?.dispatchEvent(new Event("scroll")) // pre-render    
+            ;
         });
-        this.root?.dispatchEvent(new Event("scroll")) // pre-render
-        ;
     }
     // control & steps
     next() {
@@ -770,15 +781,19 @@ const context = {
     page: "page-homepage"
 };
 const tuto = new Tip(context, "hp-infotrafic", "Comment suivre sa ligne pr\xe9f\xe9r\xe9e&nbsp;?", true, false);
-const step01 = new (0, _steps.Step)(context, "appuyez sur un bouton", "hp-infotrafic");
-const step02 = new (0, _steps.Step)(context, "filtrez vos lignes", "hp-infotrafic");
-tuto.addSteps([
-    step01,
-    step02
-]);
-tuto.render();
+let step01;
+let step02;
+setTimeout(()=>{
+    step01 = new (0, _steps.Step)(context, "appuyez sur un bouton", "hp-infotrafic");
+    step02 = new (0, _steps.Step)(context, "filtrez vos lignes", "hp-legal");
+    tuto.addSteps([
+        step01,
+        step02
+    ]);
+    tuto.render();
+}, 500); // fastdom would be a better fit for this process, but let's make it quick
 
-},{"popmotion":"iemqi","./steps":"3WWxg"}],"iemqi":[function(require,module,exports) {
+},{"popmotion":"iemqi","./steps":"3WWxg","fastdom":"321a5","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"iemqi":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "animate", ()=>(0, _indexMjs.animate));
@@ -2430,6 +2445,8 @@ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "Step", ()=>Step);
 var _popmotion = require("popmotion");
+var _fastdom = require("fastdom");
+var _fastdomDefault = parcelHelpers.interopDefault(_fastdom);
 // One tip bubble
 class Step extends EventTarget {
     constructor(context, stepLabel, attachedTo){
@@ -2446,8 +2463,9 @@ class Step extends EventTarget {
         };
         this.coords.x = Math.round(Math.random() * 160) // random x from the available margin: max-width - tip width
         ;
-        console.log(anchor.offsetTop, anchor.clientHeight);
-        this.coords.y = anchor.offsetTop + Math.round(anchor.clientHeight / 2) + 150;
+        (0, _fastdomDefault.default).measure(()=>{
+            this.coords.y = anchor.offsetTop + Math.round(anchor.clientHeight / 2);
+        });
     }
     getStepMarkup() {
         return `<div class="step-header">${(this.id ?? 0) + 1} sur ${this.amount}</div><div class="step-label">${this.label}</div>
@@ -2483,28 +2501,24 @@ class Step extends EventTarget {
             this.markup.classList.remove("as-hidden");
             this.markup.classList.add("as-displayed");
         }
-        //this.markup.classList[forceTo === true ? 'remove' : 'add']('as-hidden')
-        //this.markup.classList[forceTo === true ? 'add' : 'remove']('as-displayed')
         this.isDisplayed = forceTo ?? false;
-        (0, _popmotion.animate)(this.getAnimationAppearance(this.isDisplayed, forceTo));
+        (0, _fastdomDefault.default).mutate(()=>(0, _popmotion.animate)(this.getAnimationAppearance(this.isDisplayed, forceTo)));
     }
     getAnimationAppearance(shouldDisplay, forceTo) {
         let from = shouldDisplay === true ? 0 : 1, to = shouldDisplay === true ? 1 : 0;
-        this.markup?.scrollIntoView({
-            block: "center",
-            inline: "nearest",
-            behavior: "smooth"
-        });
+        this.focus();
         return {
             from,
             to,
             duration: 150,
             ease: (0, _popmotion.easeInOut),
             onUpdate: (latest)=>{
-                this.markup.style.opacity = `${latest}`;
+                /*if( focused === false && shouldDisplay === true && latest > 0 ){
+                focused = true
+                this.focus()
+            }*/ this.markup.style.opacity = `${latest}`;
                 this.markup.style.left = `${this.coords.x}px`;
-                this.markup.style.top = `${this.coords.y + latest * 32 - 32}px`;
-            //(this.markup as HTMLElement ).style.transform = `translate(${this.coords.x}px, ${this.coords.y + latest * 64 - 64}px)`;
+                this.markup.style.top = `${this.coords.y + 32 * (latest - 1)}px`;
             },
             onComplete: ()=>{
                 if (forceTo === false) {
@@ -2531,14 +2545,223 @@ class Step extends EventTarget {
         });
     }
     focus() {
-        this.markup?.scrollIntoView({
-            block: "center",
-            inline: "nearest",
-            behavior: "smooth"
+        (0, _fastdomDefault.default).measure(()=>{
+            this.markup?.scrollIntoView({
+                block: "center",
+                inline: "nearest",
+                behavior: "smooth"
+            });
         });
     }
 }
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","popmotion":"iemqi"}]},["8fBAf","7NFVV"], "7NFVV", "parcelRequire94c2")
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","popmotion":"iemqi","fastdom":"321a5"}],"321a5":[function(require,module,exports) {
+!function(win) {
+    /**
+ * FastDom
+ *
+ * Eliminates layout thrashing
+ * by batching DOM read/write
+ * interactions.
+ *
+ * @author Wilson Page <wilsonpage@me.com>
+ * @author Kornel Lesinski <kornel.lesinski@ft.com>
+ */ "use strict";
+    /**
+ * Mini logger
+ *
+ * @return {Function}
+ */ var debug = function() {};
+    /**
+ * Normalized rAF
+ *
+ * @type {Function}
+ */ var raf = win.requestAnimationFrame || win.webkitRequestAnimationFrame || win.mozRequestAnimationFrame || win.msRequestAnimationFrame || function(cb) {
+        return setTimeout(cb, 16);
+    };
+    /**
+ * Initialize a `FastDom`.
+ *
+ * @constructor
+ */ function FastDom() {
+        var self = this;
+        self.reads = [];
+        self.writes = [];
+        self.raf = raf.bind(win); // test hook
+        debug("initialized", self);
+    }
+    FastDom.prototype = {
+        constructor: FastDom,
+        /**
+   * We run this inside a try catch
+   * so that if any jobs error, we
+   * are able to recover and continue
+   * to flush the batch until it's empty.
+   *
+   * @param {Array} tasks
+   */ runTasks: function(tasks) {
+            debug("run tasks");
+            var task;
+            while(task = tasks.shift())task();
+        },
+        /**
+   * Adds a job to the read batch and
+   * schedules a new frame if need be.
+   *
+   * @param  {Function} fn
+   * @param  {Object} ctx the context to be bound to `fn` (optional).
+   * @public
+   */ measure: function(fn, ctx) {
+            debug("measure");
+            var task = !ctx ? fn : fn.bind(ctx);
+            this.reads.push(task);
+            scheduleFlush(this);
+            return task;
+        },
+        /**
+   * Adds a job to the
+   * write batch and schedules
+   * a new frame if need be.
+   *
+   * @param  {Function} fn
+   * @param  {Object} ctx the context to be bound to `fn` (optional).
+   * @public
+   */ mutate: function(fn, ctx) {
+            debug("mutate");
+            var task = !ctx ? fn : fn.bind(ctx);
+            this.writes.push(task);
+            scheduleFlush(this);
+            return task;
+        },
+        /**
+   * Clears a scheduled 'read' or 'write' task.
+   *
+   * @param {Object} task
+   * @return {Boolean} success
+   * @public
+   */ clear: function(task) {
+            debug("clear", task);
+            return remove(this.reads, task) || remove(this.writes, task);
+        },
+        /**
+   * Extend this FastDom with some
+   * custom functionality.
+   *
+   * Because fastdom must *always* be a
+   * singleton, we're actually extending
+   * the fastdom instance. This means tasks
+   * scheduled by an extension still enter
+   * fastdom's global task queue.
+   *
+   * The 'super' instance can be accessed
+   * from `this.fastdom`.
+   *
+   * @example
+   *
+   * var myFastdom = fastdom.extend({
+   *   initialize: function() {
+   *     // runs on creation
+   *   },
+   *
+   *   // override a method
+   *   measure: function(fn) {
+   *     // do extra stuff ...
+   *
+   *     // then call the original
+   *     return this.fastdom.measure(fn);
+   *   },
+   *
+   *   ...
+   * });
+   *
+   * @param  {Object} props  properties to mixin
+   * @return {FastDom}
+   */ extend: function(props) {
+            debug("extend", props);
+            if (typeof props != "object") throw new Error("expected object");
+            var child = Object.create(this);
+            mixin(child, props);
+            child.fastdom = this;
+            // run optional creation hook
+            if (child.initialize) child.initialize();
+            return child;
+        },
+        // override this with a function
+        // to prevent Errors in console
+        // when tasks throw
+        catch: null
+    };
+    /**
+ * Schedules a new read/write
+ * batch if one isn't pending.
+ *
+ * @private
+ */ function scheduleFlush(fastdom) {
+        if (!fastdom.scheduled) {
+            fastdom.scheduled = true;
+            fastdom.raf(flush.bind(null, fastdom));
+            debug("flush scheduled");
+        }
+    }
+    /**
+ * Runs queued `read` and `write` tasks.
+ *
+ * Errors are caught and thrown by default.
+ * If a `.catch` function has been defined
+ * it is called instead.
+ *
+ * @private
+ */ function flush(fastdom) {
+        debug("flush");
+        var writes = fastdom.writes;
+        var reads = fastdom.reads;
+        var error;
+        try {
+            debug("flushing reads", reads.length);
+            fastdom.runTasks(reads);
+            debug("flushing writes", writes.length);
+            fastdom.runTasks(writes);
+        } catch (e) {
+            error = e;
+        }
+        fastdom.scheduled = false;
+        // If the batch errored we may still have tasks queued
+        if (reads.length || writes.length) scheduleFlush(fastdom);
+        if (error) {
+            debug("task errored", error.message);
+            if (fastdom.catch) fastdom.catch(error);
+            else throw error;
+        }
+    }
+    /**
+ * Remove an item from an Array.
+ *
+ * @param  {Array} array
+ * @param  {*} item
+ * @return {Boolean}
+ */ function remove(array, item) {
+        var index = array.indexOf(item);
+        return !!~index && !!array.splice(index, 1);
+    }
+    /**
+ * Mixin own properties of source
+ * object into the target.
+ *
+ * @param  {Object} target
+ * @param  {Object} source
+ */ function mixin(target, source) {
+        for(var key in source)if (source.hasOwnProperty(key)) target[key] = source[key];
+    }
+    // There should never be more than
+    // one instance of `FastDom` in an app
+    var exports = win.fastdom = win.fastdom || new FastDom(); // jshint ignore:line
+    // Expose to CJS & AMD
+    if (typeof define == "function") define(function() {
+        return exports;
+    });
+    else module.exports = exports;
+}(typeof window !== "undefined" ? window : this);
+
+},{}]},["8fBAf","7NFVV"], "7NFVV", "parcelRequire94c2")
 
 //# sourceMappingURL=index.a858aeb9.js.map

@@ -1,5 +1,6 @@
 import { animate, easeInOut } from "popmotion"
 import { Step } from "./steps"
+import Fastdom from "fastdom"
 
 // A tip contains the general tutorial description
 class Tip {
@@ -147,53 +148,64 @@ class Tip {
 
     checkBackEvent(miniplayer:Element):void {
         miniplayer.addEventListener('pointerup',(click:Event):void => {
+            console.log(this.steps)
             this.steps[this.currentStep].focus()
-            /*this.tipBody?.scrollIntoView({
-                block: "start",
-                inline: "nearest",
-                behavior: "smooth"
-            })*/
         })
     }
 
     // passive events
 
     listenScrollEvent(miniplayer:Element):void {
-        this.root?.addEventListener('scroll',(scroll:Event):boolean => {
-            if( this.isPlaying === false ) return false // bail out if not currently playing
-            let tipBox:{
-                y:number,
-                height:number
-            } = this.tipBody?.getBoundingClientRect() ?? { y:-1, height: -1},
-            rootBox:{
-                y:number,
-                height:number
-            } = this.root?.getBoundingClientRect() ?? { y:-1, height: -1},
-            tipOverMiniplayer:boolean = false, // by default, miniplayer wins over header
-            tipMaxY:number = tipBox.y + tipBox.height
-            if( Math.abs(this.scrollLastSample - tipBox.y)>this.scrollSampling){ // avoids too much computation on a recurring event
-                // is tip's invite visible from the viewport?
-                if( 
-                    // Y de tip > Y de page/proto
-                    // Y + height < Y de page + height de proto
-                    tipMaxY > rootBox.y + this.animationScrollTolerance
-                    && tipBox.y < rootBox.y + rootBox.height - this.animationScrollTolerance
-                ){
-                    // tip is visible, miniplayer should be hidden
-                    tipOverMiniplayer = true
+        let rootBox:{
+            y:number,
+            height:number
+        },
+        tipBox:{
+            y:number,
+            height:number
+        }
+
+        Fastdom.measure(() => {
+            rootBox = this.root?.getBoundingClientRect()  ?? { y:-1, height: -1}
+            tipBox = this.tipBody?.getBoundingClientRect() ?? { y:-1, height: -1}
+
+            this.root?.addEventListener('scroll',(scroll:Event):boolean => {
+                if( this.isPlaying === false ) return false // bail out if not currently playing
+                let tipBox:{
+                    y:number,
+                    height:number
+                } = this.tipBody?.getBoundingClientRect() ?? { y:-1, height: -1},
+                rootBox:{
+                    y:number,
+                    height:number
+                } = this.root?.getBoundingClientRect() ?? { y:-1, height: -1},
+                tipOverMiniplayer:boolean = false, // by default, miniplayer wins over header
+                tipMaxY:number = tipBox.y + tipBox.height
+                if( Math.abs(this.scrollLastSample - tipBox.y)>this.scrollSampling){ // avoids too much computation on a recurring event
+                    // is tip's invite visible from the viewport?
+                    if( 
+                        // Y de tip > Y de page/proto
+                        // Y + height < Y de page + height de proto
+                        tipMaxY > rootBox.y + this.animationScrollTolerance
+                        && tipBox.y < rootBox.y + rootBox.height - this.animationScrollTolerance
+                    ){
+                        // tip is visible, miniplayer should be hidden
+                        tipOverMiniplayer = true
+                    }
+                    if( this.animationLock === false
+                        && tipOverMiniplayer === this.asMiniplayer ){
+                        // Animate the transition
+                        animate(this.getAnimationDirection(tipOverMiniplayer))
+                        this.scrollLastSample = tipBox.y // keep a record of this sampled value
+                        this.asMiniplayer = !tipOverMiniplayer // even if it's a future state
+                        this.animationLock = true
+                    }
                 }
-                if( this.animationLock === false
-                    && tipOverMiniplayer === this.asMiniplayer ){
-                    // Animate the transition
-                    animate(this.getAnimationDirection(tipOverMiniplayer))
-                    this.scrollLastSample = tipBox.y // keep a record of this sampled value
-                    this.asMiniplayer = !tipOverMiniplayer // even if it's a future state
-                    this.animationLock = true
-                }
-            }
-            return true
+                return true
+            })
+            this.root?.dispatchEvent(new Event('scroll')) // pre-render    
+
         })
-        this.root?.dispatchEvent(new Event('scroll')) // pre-render
     }
 
     // control & steps
@@ -248,10 +260,12 @@ const context: {
 }
 
 const tuto:Tip = new Tip(context,"hp-infotrafic","Comment suivre sa ligne préférée&nbsp;?", true, false)
+let step01:Step
+let step02:Step
 
-const step01:Step = new Step(context, "appuyez sur un bouton", "hp-infotrafic")
-
-const step02:Step = new Step(context, "filtrez vos lignes", "hp-infotrafic")
-
-tuto.addSteps([step01,step02])
-tuto.render()
+setTimeout(() => {
+    step01 = new Step(context, "appuyez sur un bouton", "hp-infotrafic")
+    step02 = new Step(context, "filtrez vos lignes", "hp-legal")
+    tuto.addSteps([step01,step02])
+    tuto.render()
+}, 500); // fastdom would be a better fit for this process, but let's make it quick

@@ -1,4 +1,5 @@
 import { animate, easeInOut } from "popmotion"
+import Fastdom from "fastdom"
 
 // One tip bubble
 class Step extends EventTarget  {
@@ -26,8 +27,9 @@ class Step extends EventTarget  {
         let anchor:HTMLElement = document.querySelector(`#${attachedTo}`) as HTMLElement
         this.coords = { x: -1, y: -1 }
         this.coords.x = Math.round(Math.random() * (360-200)) // random x from the available margin: max-width - tip width
-        console.log( anchor.offsetTop, anchor.clientHeight)
-        this.coords.y = anchor.offsetTop + Math.round(anchor.clientHeight / 2) + 150
+        Fastdom.measure(() => {
+            this.coords.y = anchor.offsetTop + Math.round(anchor.clientHeight / 2)
+        })
     }
 
     getStepMarkup():string {
@@ -67,32 +69,29 @@ class Step extends EventTarget  {
             this.markup.classList.remove('as-hidden')
             this.markup.classList.add('as-displayed')
         }
-        //this.markup.classList[forceTo === true ? 'remove' : 'add']('as-hidden')
-        //this.markup.classList[forceTo === true ? 'add' : 'remove']('as-displayed')
         this.isDisplayed = forceTo ?? false
-        animate(this.getAnimationAppearance(this.isDisplayed, forceTo))
+        Fastdom.mutate(()=>animate(this.getAnimationAppearance(this.isDisplayed, forceTo)))
     }
 
     getAnimationAppearance(shouldDisplay:boolean, forceTo:boolean):any {
         let from:number = shouldDisplay === true ? 0 : 1,
-        to:number = shouldDisplay === true ? 1 : 0
+        to:number = shouldDisplay === true ? 1 : 0;
 
-        this.markup?.scrollIntoView({
-            block: "center",
-            inline: "nearest",
-            behavior: "smooth"
-        })
+        this.focus()
 
         return { from, to, duration: 150, ease: easeInOut, onUpdate: latest => {
+            /*if( focused === false && shouldDisplay === true && latest > 0 ){
+                focused = true
+                this.focus()
+            }*/
             (this.markup as HTMLElement ).style.opacity = `${latest}`;
             (this.markup as HTMLElement).style.left = `${this.coords.x}px`;
-            (this.markup as HTMLElement).style.top = `${this.coords.y + latest * 32 - 32}px`;
-          //(this.markup as HTMLElement ).style.transform = `translate(${this.coords.x}px, ${this.coords.y + latest * 64 - 64}px)`;
+            (this.markup as HTMLElement).style.top = `${this.coords.y + 32 * ( latest - 1 )}px`;
         }, onComplete: () => {
-            if(forceTo === false){
-                // in this case, we END with the class switch
-                this.markup.classList.add('as-hidden')
-                this.markup.classList.remove('as-displayed')
+                if(forceTo === false){
+                    // in this case, we END with the class switch
+                    this.markup.classList.add('as-hidden')
+                    this.markup.classList.remove('as-displayed')
                 }
             }
         }
@@ -114,10 +113,12 @@ class Step extends EventTarget  {
     }
 
     focus():void {
-        this.markup?.scrollIntoView({
-            block: "center",
-            inline: "nearest",
-            behavior: "smooth"
+        Fastdom.measure(()=>{
+            this.markup?.scrollIntoView({
+                block: "center",
+                inline: "nearest",
+                behavior: "smooth"
+            })
         })
     }
 }

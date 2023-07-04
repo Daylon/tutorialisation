@@ -58,6 +58,7 @@ body {
 
 .pages {
     display: flex;
+    align-items: flex-start;
     flex-direction: row;
     padding-bottom: 8rem;
 }
@@ -106,6 +107,10 @@ body {
 .is-tip {
     display: flex;
     width: 328px;
+
+    &.as-hidden {
+        display: none;
+    }
 }
 
 .is-step {
@@ -215,4 +220,12 @@ body {
     opacity: 0;
     margin-top: -64px; // avoids taking page's content space
     z-index: 2;
+}
+
+/*
+    taylor-made adjustements
+*/
+
+#ccl-tuto {
+    margin-top: -8px;
 }

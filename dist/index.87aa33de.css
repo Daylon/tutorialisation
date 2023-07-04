@@ -36,6 +36,7 @@ body {
 
 .pages {
   flex-direction: row;
+  align-items: flex-start;
   padding-bottom: 8rem;
   display: flex;
 }
@@ -78,6 +79,10 @@ body {
 .is-tip {
   width: 328px;
   display: flex;
+}
+
+.is-tip.as-hidden {
+  display: none;
 }
 
 .is-step {
@@ -171,6 +176,10 @@ body {
   margin-top: -64px;
   position: sticky;
   top: 0;
+}
+
+#ccl-tuto {
+  margin-top: -8px;
 }
 
 /*# sourceMappingURL=index.87aa33de.css.map */

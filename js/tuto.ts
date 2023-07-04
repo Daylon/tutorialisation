@@ -125,7 +125,7 @@ class Tip {
         return this.tipElements?.pause
     }
 
-    getAnimationDirection(tipOverMiniplayer:boolean):any {
+    getMiniplayerAnimation(tipOverMiniplayer:boolean):any {
         let from:number = tipOverMiniplayer === true ? 1 : 0,
         to:number = tipOverMiniplayer === true ? 0 : 1
 
@@ -195,7 +195,7 @@ class Tip {
                     if( this.animationLock === false
                         && tipOverMiniplayer === this.asMiniplayer ){
                         // Animate the transition
-                        animate(this.getAnimationDirection(tipOverMiniplayer))
+                        animate(this.getMiniplayerAnimation(tipOverMiniplayer))
                         this.scrollLastSample = tipBox.y // keep a record of this sampled value
                         this.asMiniplayer = !tipOverMiniplayer // even if it's a future state
                         this.animationLock = true
@@ -215,11 +215,22 @@ class Tip {
         this.currentStep++
         if( this.currentStep === this.steps.length){ // maxed out
             // we should summon "congrats ! we're finished here!"
-            this.reset()
+            this.reset(false)
         } else {
             this.steps[this.currentStep]?.display()
         }
         return this.currentStep
+    }
+
+    focus():void {
+        this.reset(true)
+        setTimeout(() => {
+            this.tipBody.scrollIntoView({
+                block: "center",
+                inline: "nearest",
+                behavior: "smooth"
+            })
+        }, 150);
     }
 
     sleep():void {
@@ -241,31 +252,15 @@ class Tip {
 
     // red buttons
 
-    reset():void{
+    reset(showTutorial:boolean):void{
         this.currentStep = -1 // "next" will increment by default to zero
         this.isPlaying = false
+        //animate(this.getMiniplayerAnimation(true))
         if( this.tipBody !== null ) this.tipBody.innerHTML = this.getTipMarkup()
+        this.tipBody.classList[showTutorial === true ? 'remove' : 'add']('as-hidden')
+        animate(this.getMiniplayerAnimation(true))
     }
 
 }
 
-// START
-
-const context: {
-    root:string,
-    page:string
-} = {
-    root: "prototype",
-    page: "page-homepage"
-}
-
-const tuto:Tip = new Tip(context,"hp-infotrafic","Comment suivre sa ligne préférée&nbsp;?", true, false)
-let step01:Step
-let step02:Step
-
-setTimeout(() => {
-    step01 = new Step(context, "appuyez sur un bouton", "hp-infotrafic")
-    step02 = new Step(context, "filtrez vos lignes", "hp-legal")
-    tuto.addSteps([step01,step02])
-    tuto.render()
-}, 500); // fastdom would be a better fit for this process, but let's make it quick
+export { Tip }

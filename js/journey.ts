@@ -19,6 +19,21 @@ document.body.querySelector('.navbar-entry.voyager')?.addEventListener("pointeru
 // TO CUSTOMER ACCOUNT
 document.body.querySelector('.navbar-entry.ccl')?.addEventListener("pointerup",(click:Event):void => {
     console.log('CCL')
-    // ouvrir la gare
-    prototypeRoot?.scrollTo({ top:0, left: 360 })
+    // ouvrir la rubrique compte
+    prototypeRoot?.scrollTo({ top:0, left: 720 })
+})
+
+// TO TUTORIALS PAGE
+document.body.querySelector('#ccl-tuto')?.addEventListener("pointerup",(click:Event):void => {
+    console.log('Tuto')
+    // ouvrir la page des tutoriaux
+    prototypeRoot?.scrollTo({ top:0, left: 1080 })
+})
+
+
+// AUTORUN TUTORIAL
+document.body.querySelector('#tuto-1')?.addEventListener("pointerup",(click:Event):void => {
+    console.log('Tuto')
+    // catch any click on the upper part
+    document.body.dispatchEvent(new Event('start-tutorial'))
 })

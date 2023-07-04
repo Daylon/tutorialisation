@@ -77,13 +77,9 @@ class Step extends EventTarget  {
         let from:number = shouldDisplay === true ? 0 : 1,
         to:number = shouldDisplay === true ? 1 : 0;
 
-        this.focus()
+        if( shouldDisplay === true ) this.focus()
 
         return { from, to, duration: 150, ease: easeInOut, onUpdate: latest => {
-            /*if( focused === false && shouldDisplay === true && latest > 0 ){
-                focused = true
-                this.focus()
-            }*/
             (this.markup as HTMLElement ).style.opacity = `${latest}`;
             (this.markup as HTMLElement).style.left = `${this.coords.x}px`;
             (this.markup as HTMLElement).style.top = `${this.coords.y + 32 * ( latest - 1 )}px`;

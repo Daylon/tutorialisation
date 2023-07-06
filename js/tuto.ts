@@ -133,6 +133,7 @@ class Tip {
            (this.miniplayer as HTMLElement ).style.opacity = `${latest}`;
            (this.miniplayer as HTMLElement ).style.top = `${latest * 64 - 64}px`;
         }, onComplete: () => {
+            this.asMiniplayer = !tipOverMiniplayer
             this.animationLock = false
         } }
     }
@@ -258,7 +259,8 @@ class Tip {
         //animate(this.getMiniplayerAnimation(true))
         if( this.tipBody !== null ) this.tipBody.innerHTML = this.getTipMarkup()
         this.tipBody.classList[showTutorial === true ? 'remove' : 'add']('as-hidden')
-        animate(this.getMiniplayerAnimation(true))
+        console.log(this.asMiniplayer )
+        if( this.asMiniplayer === true ) animate(this.getMiniplayerAnimation(true))
     }
 
 }

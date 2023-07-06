@@ -1,6 +1,4 @@
-# custom
-dist/
-.parcel-cache/
+
 
 # Logs
 logs
@@ -90,3 +88,7 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
+
+# custom
+dist/
+.parcel-cache/

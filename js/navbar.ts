@@ -1,4 +1,4 @@
-class Navbar {
+class Navbar extends EventTarget {
     id:string;
     //entries:string[];
     domElement:Element | null;
@@ -7,6 +7,7 @@ class Navbar {
     entryCount:number;
 
     constructor(whichTarget:string,candidates:string[]) {
+        super()
         // root
         this.id = whichTarget
         this.domElement = document.querySelector(`#${whichTarget}`)
@@ -16,18 +17,26 @@ class Navbar {
         this.entryCount = 0
         this.navEntries = new Array()
         candidates.forEach((entryTarget:string)=>{
+            let slug:string
             this.navEntries.push(new NavEntry(entryTarget))
-            this.navEntries[this.entryCount].addEventListener(this.navEntries[this.entryCount].getSlug(), (event:Event):void => {
-                let { type } = event,
-                inactiveEntries = this.navEntries.filter(entry => entry.getSlug() !== type) 
-                inactiveEntries.forEach(this.enableEntry)
-                    })
+            slug = this.navEntries[this.entryCount].getSlug()
+            this.navEntries[this.entryCount].addEventListener(slug, (event:Event):void => {
+                    let { type } = event,
+                    inactiveEntries = this.navEntries.filter(entry => entry.getSlug() !== type) 
+                    inactiveEntries.forEach(this.enableEntry)
+                    this.dispatchEvent(new Event(slug))
+                })
             this.entryCount++;
         })
     }
 
     enableEntry(entry:NavEntry):void {
         entry.toggleState(true)
+    }
+
+    setTo(id:number):string {
+        this.navEntries[id].click()
+        return this.navEntries[id].getSlug()
     }
 }
 
@@ -61,6 +70,10 @@ class NavEntry extends EventTarget{
         this.domElement?.classList[this.isClickable === true ? `remove` : `add`](`is-active`)
         return this.isClickable
     }
+
+    click():void {
+        this.domElement.dispatchEvent(new Event("pointerup"))
+    }
 }
 
-const navigation:Navbar = new Navbar("connect-navbar", [".navbar-entry.voyager",".navbar-entry.ccl"])
+export { Navbar }

@@ -1,5 +1,6 @@
 import { Step } from "./steps"
 import { Tip } from "./tuto"
+import { Navbar } from "./navbar"
 
 // START
 
@@ -15,8 +16,9 @@ const tuto:Tip = new Tip(context,"hp-infotrafic","Comment suivre sa ligne prÃ©fÃ
 let step01:Step
 let step02:Step
 
-const prototypeRoot:Element | null = document.body.querySelector(`#prototype`)
+const navigation:Navbar = new Navbar("connect-navbar", [".navbar-entry.voyager",".navbar-entry.ccl"])
 
+const prototypeRoot:Element | null = document.body.querySelector(`#prototype`)
 
 setTimeout(() => {
     step01 = new Step(context, "appuyez sur un bouton", "hp-infotrafic")
@@ -27,5 +29,7 @@ setTimeout(() => {
 
 document.body.addEventListener('start-tutorial',(click:Event):void => {
     prototypeRoot?.scrollTo({ top:0, left: 0 })
+    let slug:string = navigation.setTo(0)
+    console.log(slug)
     tuto.focus()
 })

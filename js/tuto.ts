@@ -238,9 +238,10 @@ class Tip {
 
     previous():number {
         console.log(  'previous: ' , this.currentStep, this.steps.length)
-        this.steps[this.currentStep]?.switchClass(false) // we off the old step
+        this.steps[this.currentStep]?.switchClass(false) // we off the current step
         this.currentStep--
-        if( this.currentStep === -1){ // bottom out
+        if( this.currentStep === -1){ // bottomed out
+            console.log('reset')
             // we should restore pristine state
             this.reset(true)
         } else {
@@ -250,7 +251,7 @@ class Tip {
     }
 
     next():number {
-        if( this.currentStep > -1 ) this.steps[this.currentStep]?.switchClass(false) // we off the old step
+        if( this.currentStep > -1 ) this.steps[this.currentStep]?.switchClass(false) // we off the current step
         this.currentStep++
         if( this.currentStep === this.steps.length){ // maxed out
             // we should summon "congrats ! we're finished here!"

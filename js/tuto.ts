@@ -50,8 +50,9 @@ class Tip {
 
         this.tipElements = {
             dismiss: `<svg class="dismiss" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="24" height="24" fill="#1468CB"/>
             <path d="M13.4025 12L19 17.5975L17.5975 19L12 13.4025L6.40248 19L5.00001 17.5975L10.5975 12L5 6.40253L6.40248 5L12 10.5975L17.5975 5L18.9999 6.40253L13.4025 12Z" fill="white"/>
-            </svg>
+            </svg>                   
             `,
             tag: `<svg class="tag" width="146" height="26" viewBox="0 0 146 26" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect width="146" height="26" rx="8" fill="#1253A0"/>
@@ -87,6 +88,7 @@ class Tip {
     addStep(entry:Step,index:number,amount:number) {
         entry.set(index,amount)
         entry.addEventListener("next", () => this.next())
+        entry.addEventListener("previous", () => this.previous())
         this.steps.push(entry)
     }
 
@@ -109,14 +111,21 @@ class Tip {
         this.miniplayer.innerHTML = this.tipElements.miniplayer
         this.page?.prepend(this.miniplayer)
 
+        this.setEvents()
+    }
+
+    setEvents():void {
+        this.dissmissEvent(this.tipBody.querySelector('.dismiss'))
         this.playPauseEvent(this.tipBody)
         this.listenScrollEvent(this.miniplayer)
         this.checkBackEvent(this.miniplayer)
     }
 
+    restore
+
     getTipMarkup():string {
         return `<div class="tip-header">${this.tipElements?.tag}${this.tipElements?.dismiss}</div>
-        <div class="tip-body">${this.getPlayPauseIcon()}<div class="tip-body-label">${this.pitch}</div></div>
+        <div class="tip-body"><div class="tip-body-icon">${this.getPlayPauseIcon()}</div><div class="tip-body-label">${this.pitch}</div></div>
         <div class="tip-footer">25 secondes de présentation</div>`
     }
 
@@ -140,10 +149,22 @@ class Tip {
 
     // active events
 
+    dissmissEvent(tipDismiss:Element):void {
+        tipDismiss.addEventListener('pointerup',(click:Event):void => {
+            console.log( 'DISMISS ',click.cancelable)
+            this.steps[this.currentStep]?.switchClass(false)
+            this.reset(false)
+            click.stopImmediatePropagation()
+        })
+    }
+
     playPauseEvent(tipBody:Element):void {
         tipBody.addEventListener('pointerup',(click:Event):void => {
+            console.log('play pause')
             this.playPause()
-            tipBody.innerHTML = this.getTipMarkup()
+            this.updatePlayPauseIcon()
+            //tipBody.innerHTML = this.getTipMarkup()
+            //this.setEvents()
         })
     }
 
@@ -155,6 +176,10 @@ class Tip {
     }
 
     // passive events
+
+    updatePlayPauseIcon():void {
+        this.tipBody.querySelector('.tip-body-icon').innerHTML = `${this.getPlayPauseIcon()}`
+    }
 
     listenScrollEvent(miniplayer:Element):void {
         let rootBox:{
@@ -211,6 +236,19 @@ class Tip {
 
     // control & steps
 
+    previous():number {
+        console.log(  'previous: ' , this.currentStep, this.steps.length)
+        this.steps[this.currentStep]?.switchClass(false) // we off the old step
+        this.currentStep--
+        if( this.currentStep === -1){ // bottom out
+            // we should restore pristine state
+            this.reset(true)
+        } else {
+            this.steps[this.currentStep]?.display()
+        }
+        return this.currentStep
+    }
+
     next():number {
         if( this.currentStep > -1 ) this.steps[this.currentStep]?.switchClass(false) // we off the old step
         this.currentStep++
@@ -257,7 +295,11 @@ class Tip {
         this.currentStep = -1 // "next" will increment by default to zero
         this.isPlaying = false
         //animate(this.getMiniplayerAnimation(true))
-        if( this.tipBody !== null ) this.tipBody.innerHTML = this.getTipMarkup()
+        if( this.tipBody !== null ){
+            this.updatePlayPauseIcon()
+            //this.tipBody.innerHTML = this.getTipMarkup()
+            //this.setEvents()
+        }
         this.tipBody.classList[showTutorial === true ? 'remove' : 'add']('as-hidden')
         console.log(this.asMiniplayer )
         if( this.asMiniplayer === true ) animate(this.getMiniplayerAnimation(true))
